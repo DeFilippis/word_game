@@ -84,15 +84,17 @@ class Group(TileOwnerMixin, BaseGroup):
             TileSet.objects.create(word=word, tset=''.join(self.get_list_of_available_tiles()))
             self.regenerate_tiles()
             response['group_tiles'] = self.get_list_of_available_tiles()
+        else:
+            TileSet.objects.create(word=word, tset=''.join(self.get_list_of_available_tiles()))
+
+
         resp_dict = {}
         for i in self.get_players():
             resp_dict[i.id_in_group] = {**response, 'own_tiles': i.get_list_of_available_tiles()}
         return resp_dict
 
-
 class Player(TileOwnerMixin, BasePlayer):
     pass
-
 
 class Word(djmodels.Model):
     owner = djmodels.ForeignKey(to=Player, related_name='words', on_delete=djmodels.CASCADE)
@@ -141,6 +143,6 @@ class TileSet(djmodels.Model):
 
 def custom_export(players):
     # header row
-    yield ['session', 'participant_code', 'word', 'tiles', 'when']
+    yield ['session', 'participant_code', 'word', 'tiles', 'when', 'value']
     for t in TileSet.objects.all():
-        yield [t.word.owner.session.code, t.word.owner.participant.code, t.word.body, t.tset, str(t.when)]
+        yield [t.word.owner.session.code, t.word.owner.participant.code, t.word.body, t.tset, str(t.when), t.word.value]

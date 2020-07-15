@@ -61,14 +61,13 @@
                 "searching": false,
                 "bLengthChange": false,
                 "language": {
-                "emptyTable": "Words that you discover will appear here."
+                    "emptyTable": "Words that you discover will appear here."
                 }
             });
         });
     </script>
 
-        
-    }
+    
     {% chat %}
 
 {% endblock %}
@@ -82,9 +81,9 @@
         const submit_button = $('#submit_button');
         const $group_tiles = $('#group_tiles');
         const $own_tiles = $('#own_tiles');
+        const $history = $('#history');
 
         transform_letters();
-
 
 
         // Applies CSS to letters to transform them into tiles
@@ -107,14 +106,14 @@
         function liveRecv(word_payload) {
 
             let text = '<tr><td>' + word_payload.id_in_group + '</td><td>' + word_payload.word + '</td><td>' + word_payload.word_value + '</td><td>' + word_payload.message + '</td></tr>';
-            console.log(text);
+            //console.log(text);
             //$("#history").append(text);
-            console.log($("#history").text);
-            $("#history").row.add({
-                "Player": word_payload.id_in_group,
-                "Word": word_payload.word,
-                "Value": word_payload.word_value,
-                "Message": word_payload.message
+            //console.log($("#history").text);
+            $history.row.add({
+               "Player": word_payload.id_in_group,
+               "Word": word_payload.word,
+               "Value": word_payload.word_value,
+               "Message": word_payload.message
             }).draw();
             
             //Equivalent to const own_tiles = word_payload.own_tiles
@@ -148,13 +147,13 @@
         
         });
 
-
         function update_score(){
-            var data = $("#history").rows().data();
+            var data = $history.rows().data();
             data.each(function (value, index) {
                 console.log(`For index ${index}, data value is ${value}`);
             });
         }
+
     </script>
 {% endblock %}
 
