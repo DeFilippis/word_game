@@ -8,6 +8,7 @@
     <!-- Stores the history of the game -->
     <input type="hidden" id="game_history_hidden" name="game_history_hidden" value="">
 
+    <div class = "total_score" id="total_score"> <h3>Current Score: {{ group.total_words }} points</h3></div>
 
     <div class="container">
         <div class="row justify-content-center">
@@ -54,18 +55,7 @@
         </div>
     </div>
 
-    <script>
-        $(document).ready( function () {
-            $('#history').DataTable({
-                "pageLength": 5,
-                "searching": false,
-                "bLengthChange": false,
-                "language": {
-                    "emptyTable": "Words that you discover will appear here."
-                }
-            });
-        });
-    </script>
+
 
     
     {% chat %}
@@ -75,6 +65,14 @@
 
 {% block scripts %}
     <script>
+        var history_data_table = $('#history').DataTable({
+            "pageLength": 5,
+            "searching": false,
+            "bLengthChange": false,
+            "language": {
+                "emptyTable": "Words that you discover will appear here."
+            }
+        });
 
         console.log("Ready!");
         const submitted_word = $('#submitted_word');
@@ -82,6 +80,7 @@
         const $group_tiles = $('#group_tiles');
         const $own_tiles = $('#own_tiles');
         const $history = $('#history');
+        const $total_score = $('#total_score');
 
         transform_letters();
 
@@ -99,22 +98,23 @@
                 let payload = {word: submitted_word.val(),}
                 liveSend(payload);
                 $('#submitted_word').val("");
+                $total_score.val("<h3>Current Score: {{ group.total_words }} points</h3>");
                 //update_score(); 
             }
         });
 
         function liveRecv(word_payload) {
 
+
             let text = '<tr><td>' + word_payload.id_in_group + '</td><td>' + word_payload.word + '</td><td>' + word_payload.word_value + '</td><td>' + word_payload.message + '</td></tr>';
             //console.log(text);
             //$("#history").append(text);
             //console.log($("#history").text);
-            $history.row.add({
-               "Player": word_payload.id_in_group,
-               "Word": word_payload.word,
-               "Value": word_payload.word_value,
-               "Message": word_payload.message
-            }).draw();
+            history_data_table.row.add([word_payload.id_in_group,
+                word_payload.word,
+                word_payload.word_value,
+                word_payload.message]
+            ).draw();
             
             //Equivalent to const own_tiles = word_payload.own_tiles
             const {own_tiles, group_tiles} = word_payload;
@@ -266,7 +266,12 @@
             .scrabble-tile__new-word {
             clear: none; } }
 
-
+        .total_score{
+            position:absolute;
+            top:10px;
+            right: 10px;
+            font-size: large;
+         }
 
     </style>
 {% endblock %}

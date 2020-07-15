@@ -5,7 +5,10 @@ from otree.api import (
 import random
 from collections import Counter
 from django.db import models as djmodels
+from django.db.models import Sum
+
 import yaml
+
 
 author = 'Evan DeFilippis'
 
@@ -35,7 +38,7 @@ class Constants(BaseConstants):
 
     # Number of rounds
     num_rounds = 1
-    NON_EXISTANCE_VALUE = -1
+    NON_EXISTENCE_VALUE = -1
 
 
 class Subsession(BaseSubsession):
@@ -55,6 +58,9 @@ class TileOwnerMixin:
 
 class Group(TileOwnerMixin, BaseGroup):
     final_score = models.IntegerField(initial = 0)
+
+    def total_words(self):
+        return self.words.aggregate(totwords=Sum('value'))['totwords']
 
     @property
     def words(self):
@@ -87,7 +93,6 @@ class Group(TileOwnerMixin, BaseGroup):
         else:
             TileSet.objects.create(word=word, tset=''.join(self.get_list_of_available_tiles()))
 
-
         resp_dict = {}
         for i in self.get_players():
             resp_dict[i.id_in_group] = {**response, 'own_tiles': i.get_list_of_available_tiles()}
@@ -107,7 +112,7 @@ class Word(djmodels.Model):
         if self.exists and self.attainable:
             return sum([Constants.letter_values[l] for l in body])
         else:
-            return Constants.NON_EXISTANCE_VALUE
+            return Constants.NON_EXISTENCE_VALUE
 
     @property
     def body(self):
