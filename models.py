@@ -16,7 +16,6 @@ doc = """
 Word game involving interdependence and cooperation
 """
 
-
 class Constants(BaseConstants):
     # Set the number of players in this game
     players_per_group = 2
@@ -61,14 +60,14 @@ class Group(TileOwnerMixin, BaseGroup):
 
     def total_words(self):
         group_score = self.words.aggregate(totwords=Sum('value'))['totwords']
-        if group_score == None:
+        if group_score is None:
             return 0
         else:
             return group_score
 
     @property
     def words(self):
-        return Word.objects.filter(owner__group=self)
+        return Word.objects.filter(owner__group=self).order_by('-id')
 
     def regenerate_tiles(self):
         """Theoretically can be a transactional conflict here...."""

@@ -23,7 +23,7 @@
 
         <table id="history" class="display">
             <thead>
-               
+                <th>Row_Number</th>
                 <th>Player</th>
                 <th>Word</th>
                 <th>Value</th>
@@ -65,16 +65,23 @@
 
 {% block scripts %}
     <script>
+
         var history_data_table = $('#history').DataTable({
             "pageLength": 5,
             "searching": false,
             "bLengthChange": false,
             "language": {
                 "emptyTable": "Words that you discover will appear here."
+            },
+            "order": [[0, "desc"]],
+            "columnDefs": [
+            {
+                targets: [0],
+                visible: false,
+                searchable: false
             }
+            ]
         });
-
-
 
         console.log("Ready!");
         const submitted_word = $('#submitted_word');
@@ -101,6 +108,8 @@
                 liveSend(payload);
                 $('#submitted_word').val("");
             }
+
+
         });
 
         function liveRecv(word_payload) {
@@ -109,14 +118,17 @@
             //console.log(word_payload.total_score);
             $total_score.html("<h3>Current Score: " + word_payload.total_score + " points</h3>");
 
-            history_data_table.row.add([word_payload.id_in_group,
+            const how_many = history_data_table.rows().count();
+            //t.row.add([how_many + 1, "whatever" + (how_many + 1).toString()]).draw(false);
+
+            history_data_table.row.add([how_many + 1, 
+                word_payload.id_in_group,
                 word_payload.word,
                 word_payload.word_value,
-                word_payload.message]
-            ).reverse().draw();
+                word_payload.message]).draw(false);
 
-            $('#history tr:first-child').remove(); 
-            $('#history tr:first').before(text);
+            //$('#history tr:first-child').remove(); 
+            //$('#history tr:first').before(text);
 
             //Equivalent to const own_tiles = word_payload.own_tiles
             const {own_tiles, group_tiles} = word_payload;
@@ -130,8 +142,6 @@
                 $group_tiles.html(group_tiles);
             }
         }
-
-
 
         //Attach listener to form to allow Enter Key to submit a word
         submitted_word.keypress(function (e) {
@@ -150,13 +160,6 @@
             transform_letters(); 
         
         });
-
-        function update_score(){
-            var data = $history.rows().data();
-            data.each(function (value, index) {
-                console.log(`For index ${index}, data value is ${value}`);
-            });
-        }
 
     </script>
 {% endblock %}
