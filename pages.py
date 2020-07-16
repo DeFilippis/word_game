@@ -3,7 +3,7 @@ from ._builtin import Page, WaitPage
 
 
 class Play_Game(Page):
-    timeout_seconds = 100
+    timeout_seconds = 60 * 30
     
     live_method = 'live_word'
 

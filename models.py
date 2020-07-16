@@ -60,7 +60,11 @@ class Group(TileOwnerMixin, BaseGroup):
     final_score = models.IntegerField(initial = 0)
 
     def total_words(self):
-        return self.words.aggregate(totwords=Sum('value'))['totwords']
+        group_score = self.words.aggregate(totwords=Sum('value'))['totwords']
+        if group_score == None:
+            return 0
+        else:
+            return group_score
 
     @property
     def words(self):
@@ -81,21 +85,25 @@ class Group(TileOwnerMixin, BaseGroup):
         p = self.get_player_by_id(id_in_group) # get player who submitted the word
         word = p.words.create() #create new instance of "word model" in the database
         word.body = w
+        total_score = self.total_words()
+
         response = dict(id_in_group=id_in_group,
                         word=word.body,
                         word_value=word.value,
-                        message=word.status
+                        message=word.status,
+                        total_score= total_score
                         )
-        if word.status == 'Success':
-            TileSet.objects.create(word=word, tset=''.join(self.get_list_of_available_tiles()))
-            self.regenerate_tiles()
-            response['group_tiles'] = self.get_list_of_available_tiles()
-        else:
-            TileSet.objects.create(word=word, tset=''.join(self.get_list_of_available_tiles()))
+        #if word.status == 'Success':
+        TileSet.objects.create(word=word, tset=''.join(self.get_list_of_available_tiles()))
+        self.regenerate_tiles()
+        response['group_tiles'] = self.get_list_of_available_tiles()
+        #else:
+        #    self.regenerate_tiles()
+        #    TileSet.objects.create(word=word, tset=''.join(self.get_list_of_available_tiles()))
 
         resp_dict = {}
         for i in self.get_players():
-            resp_dict[i.id_in_group] = {**response, 'own_tiles': i.get_list_of_available_tiles()}
+            resp_dict[i.id_in_group] = {**response, 'own_tiles': "".join(i.get_list_of_available_tiles())}
         return resp_dict
 
 class Player(TileOwnerMixin, BasePlayer):
